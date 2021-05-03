@@ -118,7 +118,7 @@ export default {
       data: null,
       renderArea: null,
       dropdown_font: ['Arial', 'Calibri', 'Courier', 'Verdana', 'Times New Roman', 'Sans serif'],
-      font_Size: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+      font_Size: [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
       dropdown_edit: ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '28', '36', '48', '72'],
       font: {},
       content: null,
