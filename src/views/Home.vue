@@ -3,8 +3,8 @@
     <!-- Top bar -->
     <vue-file-toolbar-menu :content="menu" class="bar" />
     <!-- Document editor -->
-    <vue-document-editor class="editor" ref="editor" :content.sync="content" :overlay="overlay" :zoom="zoom"
-      :page_format_mm="page_format_mm" :page_margins="page_margins" :display="display" style="background-color: silver;height: 100%;width:100%; overflow: auto"/>
+    <vue-document-editor class="editor" ref="editor" :content.sync="content" :overlay="overlay" :zoom="zoom" :page_format_mm="page_format_mm"
+     :page_margins="page_margins" :display="display" style="background-color: silver;height: 100%;width:100%; overflow: auto"/>
 
   </div>
 </template>
@@ -243,8 +243,8 @@ export default {
 
     // Formats management
     current_format_name () {
-      const format = this.formats.find(([, width_mm, height_mm]) => (this.page_format_mm[0] == width_mm && this.page_format_mm[1] == height_mm));
-      return format ? format[0] : (this.page_format_mm[0]+'mm x '+this.page_format_mm[1]+'mm');
+      const format = this.formats.find(([, width_mm, height_mm]) => (this.page_format_mm[0] == width_mm && this.page_format_mm[1] == height_mm))
+      return format ? format[0] : (this.page_format_mm[0]+'mm x '+this.page_format_mm[1]+'mm')
     },
     formats: () => [
       ['A0', 841, 1189],
@@ -287,19 +287,19 @@ export default {
       const stack = this.current_text_style.textDecorationStack
       return stack && stack.some(d => (d.indexOf('line-through') == 0))
     },
-    isNumberedList () { return this.current_text_style.isList && this.current_text_style.listStyleType == 'decimal'; },
-    isBulletedList () { return this.current_text_style.isList && ['disc', 'circle'].includes(this.current_text_style.listStyleType); },
-    isH1 () { return this.current_text_style.headerLevel == 1; },
-    isH2 () { return this.current_text_style.headerLevel == 2; },
-    isH3 () { return this.current_text_style.headerLevel == 3; },
-    curColor () { return this.current_text_style.color || 'transparent'; },
+    isNumberedList () { return this.current_text_style.isList && this.current_text_style.listStyleType == 'decimal' },
+    isBulletedList () { return this.current_text_style.isList && ['disc', 'circle'].includes(this.current_text_style.listStyleType) },
+    isH1 () { return this.current_text_style.headerLevel == 1 },
+    isH2 () { return this.current_text_style.headerLevel == 2 },
+    isH3 () { return this.current_text_style.headerLevel == 3 },
+    curColor () { return this.current_text_style.color || 'transparent' },
 
     // Platform management
     isMacLike: () => /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform),
 
     // Undo / redo flags
-    can_undo () { return this.undo_count > 0; },
-    can_redo () { return this.content_history.length - this.undo_count - 1 > 0; }
+    can_undo () { return this.undo_count > 0 },
+    can_redo () { return this.content_history.length - this.undo_count - 1 > 0 }
   },
 
   methods: {
@@ -313,21 +313,21 @@ export default {
         html += '<div style="position: absolute; left: 0; top: 0; right: 0; padding: 3mm 5mm; background: rgba(200, 220, 240, 0.5)"><strong>MYCOMPANY</strong> example.com /// This is a custom header overlay</div>';
         html += '<div style="position: absolute; left: 10mm; right: 10mm; bottom: 5mm; text-align:center; font-size:10pt"> /// This is a custom footer Content</div>';
       }
-      return html;
+      return html
     },
 
     // Undo / redo functions examples
-    undo () { if(this.can_undo){ this._mute_next_content_watcher = true; this.content = this.content_history[--this.undo_count] } },
-    redo () { if(this.can_redo){ this._mute_next_content_watcher = true; this.content = this.content_history[++this.undo_count] } },
+    undo () { if (this.can_undo) { this._mute_next_content_watcher = true; this.content = this.content_history[--this.undo_count] } },
+    redo () { if (this.can_redo) { this._mute_next_content_watcher = true; this.content = this.content_history[++this.undo_count] } },
     resetContentHistory () { this.content_history = []; this.undo_count = -1 },
 
     // Insert page break function example
     async insertPageBreak () {
       // insert paragraph at caret position
-      document.execCommand("insertParagraph");
+      document.execCommand("insertParagraph")
 
       // insert a marker at caret position (start of the new paragraph)
-      const marker = "###PB###"; // must be regex compatible
+      const marker = "###PB###" // must be regex compatible
       document.execCommand('insertText', false, marker)
 
       // wait for DOM update
@@ -335,14 +335,14 @@ export default {
 
       // find the marker inside content items and split this content item in two items between the two paragraphs
       // only match root tags (p, div, h1, h2...) to avoid non-root tags like <li>
-      const regexp = new RegExp('<(p|div|h\\d)( [^/>]+)*>(<[^/>]+>)*'+marker);
+      const regexp = new RegExp('<(p|div|h\\d)( [^/>]+)*>(<[^/>]+>)*'+marker)
       for(let i = 0; i < this.content.length; i++) {
-        const item = this.content[i];
-        if(typeof item != 'string') continue;
-        const match = regexp.exec(item);
+        const item = this.content[i]
+        if(typeof item != 'string') continue
+        const match = regexp.exec(item)
         if(match) {
-          const tags_open = match[0].slice(0, -marker.length);
-          let content_plus_tags_close = item.substr(match.index + match[0].length);
+          const tags_open = match[0].slice(0, -marker.length)
+          let content_plus_tags_close = item.substr(match.index + match[0].length)
           // insert <br> to empty pages that would not be handled correctly by contenteditable
           if(content_plus_tags_close.indexOf('</') == 0) content_plus_tags_close = '<br>' + content_plus_tags_close
           this.content.splice(i, 1, item.substr(0, match.index), tags_open + content_plus_tags_close)
@@ -365,11 +365,11 @@ export default {
       immediate: true,
       // Fill undo / redo history stack on user input
       handler (new_content) {
-        if(!this._mute_next_content_watcher) { // only update the stack when content is changed by user input, not undo/redo commands
-          this.content_history[++this.undo_count] = new_content;
-          this.content_history.length = this.undo_count + 1; // remove all redo items
+        if (!this._mute_next_content_watcher) { // only update the stack when content is changed by user input, not undo/redo commands
+          this.content_history[++this.undo_count] = new_content
+          this.content_history.length = this.undo_count + 1 // remove all redo items
         }
-        this._mute_next_content_watcher = false;
+        this._mute_next_content_watcher = false
       }
     }
   }
