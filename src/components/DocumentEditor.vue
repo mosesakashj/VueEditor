@@ -9,7 +9,7 @@
     </div>
 
     <!-- Document editor -->
-    <div class="content" ref="content" :contenteditable="editable" :style="page_style(-1)" @input="input" @keyup="process_current_text_style">
+    <div class="content" ref="content" :contenteditable="editable" :style="page_style(-1)" @input="input" @keyup="process_current_text_style" style="overflow: auto;width: 100%">
       <!-- Contains every page of the document (can be modified by the DOM afterwards) -->
       <div v-for="(page, page_idx) in pages" class="page"
         :key="page.uuid" :ref="page.uuid" :data-content-idx="page.content_idx" :data-page-idx="page_idx"
@@ -399,6 +399,20 @@ export default {
 
       // replace current body by the print body
       document.body = print_body;
+    },
+
+    Export2Doc(filename = 'export') {
+      var head = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
+      var footer = "</body></html>";
+      var html = head+document.body.innerHTML+footer;
+      var url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html)
+      filename = filename?filename+'.doc':'document.doc'
+      var downloadLink = document.createElement("a")
+      document.body.appendChild(downloadLink)
+      downloadLink.href = url
+      downloadLink.download = filename
+      downloadLink.click()
+      document.body.removeChild(downloadLink)
     },
 
     // Restore content after closing the native print box
