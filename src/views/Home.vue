@@ -33,8 +33,9 @@ export default {
       zoom_min: 0.10,
       zoom_max: 5.0,
       page_format_mm: [210, 297],
-      page_margins: "10mm 15mm",
-      display: "vertical", // ["grid", "vertical", "horizontal"]
+      page_orientation: 'portrait',
+      page_margins: '10mm 15mm',
+      display: 'vertical', // ['grid', 'vertical', 'horizontal']
       mounted: false, // will be true after this component is mounted
       undo_count: -1, // contains the number of times user can undo (= current position in content_history)
       content_history: [] // contains the content states for undo/redo operations
@@ -43,12 +44,10 @@ export default {
 
   created () {
     // Initialize gesture flags
-    let start_zoom_gesture = false;
-    let start_dist_touch = false;
-    let start_zoom_touch = false;
+    let start_zoom_gesture, start_dist_touch, start_zoom_touch = false
 
     // Manage ctrl+scroll zoom (or trackpad pinch)
-    window.addEventListener("wheel", (e) => {
+    window.addEventListener('wheel', (e) => {
       if(e.ctrlKey){
         e.preventDefault()
         this.zoom = Math.min(Math.max(this.zoom - e.deltaY * 0.01, this.zoom_min), this.zoom_max)
@@ -56,22 +55,20 @@ export default {
     }, { passive: false })
 
     // Manage trackpad pinch on Safari
-    window.addEventListener("gesturestart", (e) => {
+    window.addEventListener('gesturestart', (e) => {
       e.preventDefault()
       start_zoom_gesture = this.zoom
     })
-    window.addEventListener("gesturechange", (e) => {
+    window.addEventListener('gesturechange', (e) => {
       e.preventDefault()
-      if(!start_zoom_touch){
-        this.zoom = Math.min(Math.max(start_zoom_gesture * e.scale, this.zoom_min), this.zoom_max);
-      }
+      if(!start_zoom_touch) this.zoom = Math.min(Math.max(start_zoom_gesture * e.scale, this.zoom_min), this.zoom_max)
     })
-    window.addEventListener("gestureend", () => {
+    window.addEventListener('gestureend', () => {
       start_zoom_gesture = false
     })
 
     // Manage pinch to zoom for touch devices
-    window.addEventListener("touchstart", (e) => {
+    window.addEventListener('touchstart', (e) => {
       if (e.touches.length == 2) {
         e.preventDefault();
         start_dist_touch = Math.hypot(
@@ -81,7 +78,7 @@ export default {
         start_zoom_touch = this.zoom;
       }
     }, { passive: false });
-    window.addEventListener("touchmove", (e) => {
+    window.addEventListener('touchmove', (e) => {
       if (start_dist_touch && start_zoom_touch) {
         e.preventDefault();
         let zoom = start_zoom_touch * Math.hypot(
@@ -91,7 +88,7 @@ export default {
         this.zoom = Math.min(Math.max(zoom, this.zoom_min), this.zoom_max);
       }
     }, { passive: false });
-    window.addEventListener("touchend", () => {
+    window.addEventListener('touchend', () => {
       start_dist_touch = false;
       start_zoom_touch = false;
     }, { passive: false });
@@ -99,21 +96,20 @@ export default {
     // Manage history undo/redo events
     const manage_undo_redo = (e) => {
       switch(e && e.inputType){
-        case "historyUndo": e.preventDefault(); e.stopPropagation(); this.undo(); break;
-        case "historyRedo": e.preventDefault(); e.stopPropagation(); this.redo(); break;
+        case 'historyUndo': e.preventDefault(); e.stopPropagation(); this.undo(); break;
+        case 'historyRedo': e.preventDefault(); e.stopPropagation(); this.redo(); break;
       }
     }
-    window.addEventListener("beforeinput", manage_undo_redo)
-    window.addEventListener("input", manage_undo_redo) // in case of beforeinput event is not implemented (Firefox)
+    window.addEventListener('beforeinput', manage_undo_redo)
+    window.addEventListener('input', manage_undo_redo) // in case of beforeinput event is not implemented (Firefox)
 
     // If your component is susceptible to be destroyed, don't forget to
     // use window.removeEventListener in the Vue.js beforeDestroy handler
   },
 
-  mounted () { this.mounted = true; },
+  mounted () { this.mounted = true },
 
   computed: {
-
     // This is the menu content
     menu () {
       return [
@@ -147,14 +143,14 @@ export default {
 
         { // Format menu
           text: this.current_format_name,
-          title: "Format",
-          icon: "mdi-crop-free",
+          title: 'Format',
+          icon: 'mdi-crop-free',
           chevron: true,
           menu: this.formats.map(([text, w, h]) => {
             return {
               text,
               active: (this.page_format_mm[0] == w && this.page_format_mm[1] == h),
-              click: () => { this.page_format_mm = [w, h]; }
+              click: () => this.page_format_mm = [w, h]
             }
           }),
           menu_width: 80,
@@ -162,37 +158,37 @@ export default {
         },
         { // Margins menu
           text: this.current_margins_name,
-          title: "Margins",
-          icon: "mdi-select-all",
+          title: 'Margins',
+          icon: 'mdi-select-all',
           chevron: true,
           menu: this.margins.map(([text, value]) => {
             return {
-              text: text+" ("+value+")",
+              text: text+' ('+value+')',
               active: (this.page_margins == value),
               click: () => { this.page_margins = value; }
             }
           }),
           menu_width: 200,
-          menu_class: "align-center"
+          menu_class: 'align-center'
         },
         { // Zoom menu
-          text: Math.floor(this.zoom * 100) + "%",
-          title: "Zoom",
-          icon: "mdi-magnify",
+          text: Math.floor(this.zoom * 100) + '%',
+          title: 'Zoom',
+          icon: 'mdi-magnify',
           chevron: true,
           menu: [
-            ["200%", 2.0],
-            ["150%", 1.5],
-            ["125%", 1.25],
-            ["100%", 1.0],
-            ["75%", 0.75],
-            ["50%", 0.5],
-            ["25%", 0.25]
+            ['200%', 2.0],
+            ['150%', 1.5],
+            ['125%', 1.25],
+            ['100%', 1.0],
+            ['75%', 0.75],
+            ['50%', 0.5],
+            ['25%', 0.25]
           ].map(([text, zoom]) => {
             return {
               text,
               active: this.zoom == zoom,
-              click: () => { this.zoom = zoom; }
+              click: () => { this.zoom = zoom }
             }
           }),
           menu_width: 80,
@@ -204,23 +200,43 @@ export default {
           icon: this.display == "horizontal" ? "mdi-view-column" : (this.display == "vertical" ? "mdi-view-stream" : "mdi-view-module"),
           chevron: true,
           menu: [{
-            icon: "mdi-view-module",
-            text: "grid",
-            active: this.display == "grid",
-            click: () => { this.display = "grid"; }
+            icon: 'mdi-view-module',
+            text: 'grid',
+            active: this.display == 'grid',
+            click: () => this.display = 'grid'
           }, {
-            icon: "mdi-view-column",
-            text: "horizontal",
-            active: this.display == "horizontal",
-            click: () => { this.display = "horizontal"; }
+            icon: 'mdi-view-column',
+            text: 'horizontal',
+            active: this.display == 'horizontal',
+            click: () =>  this.display = 'horizontal'
           }, {
-            icon: "mdi-view-stream",
-            text: "vertical",
-            active: this.display == "vertical",
-            click: () => { this.display = "vertical"; }
+            icon: 'mdi-view-stream',
+            text: 'vertical',
+            active: this.display == 'vertical',
+            click: () =>  this.display = 'vertical'
           }],
           menu_width: 55,
-          menu_class: "align-right"
+          menu_class: 'align-right'
+        },
+        // Orientation Change
+        {
+          title: 'Orientation',
+          icon: this.page_format_mm[0] < this.page_format_mm[1] ? 'mdi-crop-portrait' : 'mdi-crop-landscape',
+          menu: [{
+            icon: 'mdi-crop-portrait',
+            text: 'Portait',
+            active: this.page_format_mm[0] < this.page_format_mm[1],
+            click: () => {
+              if (this.page_format_mm[0] > this.page_format_mm[1]) this.page_format_mm = JSON.parse(JSON.stringify([this.page_format_mm[1], this.page_format_mm[0]]))
+            }
+          }, {
+            icon: 'mdi-crop-landscape',
+            text: 'Landscape',
+            active: this.page_format_mm[0] > this.page_format_mm[1],
+            click: () => {
+              if (this.page_format_mm[0] < this.page_format_mm[1]) this.page_format_mm = JSON.parse(JSON.stringify([this.page_format_mm[1], this.page_format_mm[0]]))
+            }
+          }]
         }
       ]
     },
@@ -228,62 +244,55 @@ export default {
     // Formats management
     current_format_name () {
       const format = this.formats.find(([, width_mm, height_mm]) => (this.page_format_mm[0] == width_mm && this.page_format_mm[1] == height_mm));
-      return format ? format[0] : (this.page_format_mm[0]+"mm x "+this.page_format_mm[1]+"mm");
+      return format ? format[0] : (this.page_format_mm[0]+'mm x '+this.page_format_mm[1]+'mm');
     },
     formats: () => [
-      ["A0", 841, 1189],
-      ["A0L", 1189, 841],
-      ["A1", 594, 841],
-      ["A1L", 841, 594],
-      ["A2", 420, 594],
-      ["A2L", 594, 420],
-      ["A3", 297, 420],
-      ["A3L", 420, 297],
-      ["A4", 210, 297],
-      ["A4L", 297, 210],
-      ["A5", 148, 210],
-      ["A5L", 210, 148],
-      ["A6", 105, 148],
-      ["A6L", 148, 105]
+      ['A0', 841, 1189],
+      ['A1', 594, 841],
+      ['A2', 420, 594],
+      ['A3', 297, 420],
+      ['A4', 210, 297],
+      ['A5', 148, 210],
+      ['A6', 105, 148],
     ],
 
     // Margins management
     current_margins_name () {
-      const margins = this.margins.find(([, margins]) => (this.page_margins == margins));
-      return margins ? margins[0] : margins[1];
+      const margins = this.margins.find(([, margins]) => (this.page_margins === margins))
+      return margins ? margins[0] : margins[1]
     },
     margins: () => [
-      ["Medium", "20mm"],
-      ["Small", "15mm"],
-      ["Slim", "10mm 15mm"],
-      ["Tiny", "5mm"]
+      ['Medium', '20mm'],
+      ['Small', '15mm'],
+      ['Slim', '10mm 15mm'],
+      ['Tiny', '5mm']
     ],
 
     // Current text style management
-    current_text_style () { return this.mounted ? this.$refs.editor.current_text_style : false; },
-    isLeftAligned () { return ["start", "left", "-moz-left"].includes(this.current_text_style.textAlign); },
-    isRightAligned () { return ["end", "right", "-moz-right"].includes(this.current_text_style.textAlign); },
-    isCentered () { return ["center", "-moz-center"].includes(this.current_text_style.textAlign); },
-    isJustified () { return ["justify", "justify-all"].includes(this.current_text_style.textAlign); },
+    current_text_style () { return this.mounted ? this.$refs.editor.current_text_style : false },
+    isLeftAligned () { return ['start', 'left', '-moz-left'].includes(this.current_text_style.textAlign) },
+    isRightAligned () { return ['end', 'right', '-moz-right'].includes(this.current_text_style.textAlign) },
+    isCentered () { return ['center', '-moz-center'].includes(this.current_text_style.textAlign) },
+    isJustified () { return ['justify', 'justify-all'].includes(this.current_text_style.textAlign) },
     isBold () {
-      const fontWeight = this.current_text_style.fontWeight;
-      return fontWeight && (parseInt(fontWeight) > 400 || fontWeight.indexOf("bold") == 0);
+      const fontWeight = this.current_text_style.fontWeight
+      return fontWeight && (parseInt(fontWeight) > 400 || fontWeight.indexOf('bold') == 0)
     },
-    isItalic () { return this.current_text_style.fontStyle == "italic"; },
+    isItalic () { return this.current_text_style.fontStyle == 'italic' },
     isUnderline () { // text-decoration is not overridden by children, so we query the parent stack
-      const stack = this.current_text_style.textDecorationStack;
-      return stack && stack.some(d => (d.indexOf("underline") == 0));
+      const stack = this.current_text_style.textDecorationStack
+      return stack && stack.some(d => (d.indexOf('underline') == 0))
     },
     isStrikeThrough () { // text-decoration is not overridden by children, so we query the parent stack
-      const stack = this.current_text_style.textDecorationStack;
-      return stack && stack.some(d => (d.indexOf("line-through") == 0));
+      const stack = this.current_text_style.textDecorationStack
+      return stack && stack.some(d => (d.indexOf('line-through') == 0))
     },
-    isNumberedList () { return this.current_text_style.isList && this.current_text_style.listStyleType == "decimal"; },
-    isBulletedList () { return this.current_text_style.isList && ["disc", "circle"].includes(this.current_text_style.listStyleType); },
+    isNumberedList () { return this.current_text_style.isList && this.current_text_style.listStyleType == 'decimal'; },
+    isBulletedList () { return this.current_text_style.isList && ['disc', 'circle'].includes(this.current_text_style.listStyleType); },
     isH1 () { return this.current_text_style.headerLevel == 1; },
     isH2 () { return this.current_text_style.headerLevel == 2; },
     isH3 () { return this.current_text_style.headerLevel == 3; },
-    curColor () { return this.current_text_style.color || "transparent"; },
+    curColor () { return this.current_text_style.color || 'transparent'; },
 
     // Platform management
     isMacLike: () => /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform),
@@ -299,18 +308,18 @@ export default {
       // Add page numbers on each page
       let html = '<div style="position: absolute; bottom: 8mm; ' + ((page % 2) ? 'right' : 'left') + ': 10mm">Page ' + page + ' of ' + total + '</div>';
 
-      // Add custom headers and footers from page 3
-      if(page >= 3) {
+      // Add custom headers and footers from page 1
+      if(page >= 1) {
         html += '<div style="position: absolute; left: 0; top: 0; right: 0; padding: 3mm 5mm; background: rgba(200, 220, 240, 0.5)"><strong>MYCOMPANY</strong> example.com /// This is a custom header overlay</div>';
-        html += '<div style="position: absolute; left: 10mm; right: 10mm; bottom: 5mm; text-align:center; font-size:10pt">Copyright (c) 2020 Romain Lamothe, MIT License /// This is a custom footer overlay</div>';
+        html += '<div style="position: absolute; left: 10mm; right: 10mm; bottom: 5mm; text-align:center; font-size:10pt"> /// This is a custom footer Content</div>';
       }
       return html;
     },
 
     // Undo / redo functions examples
-    undo () { if(this.can_undo){ this._mute_next_content_watcher = true; this.content = this.content_history[--this.undo_count]; } },
-    redo () { if(this.can_redo){ this._mute_next_content_watcher = true; this.content = this.content_history[++this.undo_count]; } },
-    resetContentHistory () { this.content_history = []; this.undo_count = -1; },
+    undo () { if(this.can_undo){ this._mute_next_content_watcher = true; this.content = this.content_history[--this.undo_count] } },
+    redo () { if(this.can_redo){ this._mute_next_content_watcher = true; this.content = this.content_history[++this.undo_count] } },
+    resetContentHistory () { this.content_history = []; this.undo_count = -1 },
 
     // Insert page break function example
     async insertPageBreak () {
@@ -319,34 +328,34 @@ export default {
 
       // insert a marker at caret position (start of the new paragraph)
       const marker = "###PB###"; // must be regex compatible
-      document.execCommand("insertText", false, marker);
+      document.execCommand('insertText', false, marker)
 
       // wait for DOM update
-      await this.$nextTick();
+      await this.$nextTick()
 
       // find the marker inside content items and split this content item in two items between the two paragraphs
       // only match root tags (p, div, h1, h2...) to avoid non-root tags like <li>
-      const regexp = new RegExp("<(p|div|h\\d)( [^/>]+)*>(<[^/>]+>)*"+marker);
+      const regexp = new RegExp('<(p|div|h\\d)( [^/>]+)*>(<[^/>]+>)*'+marker);
       for(let i = 0; i < this.content.length; i++) {
         const item = this.content[i];
-        if(typeof item != "string") continue;
+        if(typeof item != 'string') continue;
         const match = regexp.exec(item);
         if(match) {
           const tags_open = match[0].slice(0, -marker.length);
           let content_plus_tags_close = item.substr(match.index + match[0].length);
           // insert <br> to empty pages that would not be handled correctly by contenteditable
-          if(content_plus_tags_close.indexOf("</") == 0) content_plus_tags_close = "<br>" + content_plus_tags_close;
-          this.content.splice(i, 1, item.substr(0, match.index), tags_open + content_plus_tags_close);
-          return;
+          if(content_plus_tags_close.indexOf('</') == 0) content_plus_tags_close = '<br>' + content_plus_tags_close
+          this.content.splice(i, 1, item.substr(0, match.index), tags_open + content_plus_tags_close)
+          return
         }
       }
 
       // if the code didn't return before, the split didn't work (e.g. inside a <li>). just remove the marker from the content
       for(let i = 0; i < this.content.length; i++) {
-        const item = this.content[i];
-        if(typeof item != "string" || item.indexOf(marker) < 0) continue;
-        this.content.splice(i, 1, item.replace(marker, ''));
-        break;
+        const item = this.content[i]
+        if(typeof item != 'string' || item.indexOf(marker) < 0) continue
+        this.content.splice(i, 1, item.replace(marker, ''))
+        break
       }
     }
   },
