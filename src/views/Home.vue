@@ -129,7 +129,7 @@ export default {
         { icon: 'mdi-format-italic', title: 'Italic', active: this.isItalic, disabled: !this.current_text_style, hotkey: this.isMacLike ? 'command+i' : 'ctrl+i', click: () => document.execCommand('italic') },
         { icon: 'mdi-format-underline', title: 'Underline', active: this.isUnderline, disabled: !this.current_text_style, hotkey: this.isMacLike ? 'command+u' : 'ctrl+u', click: () => document.execCommand('underline') },
         { icon: 'mdi-format-strikethrough', title: 'Strike through', active: this.isStrikeThrough, disabled: !this.current_text_style, click: () => document.execCommand('strikethrough') },
-        { is: 'button-color', type: 'compact', menu_class: 'align-center', disabled: !this.current_text_style, color: this.curColor, update_color: (new_color) => document.execCommand('foreColor', false, new_color.hex8) },
+        { is: 'button-color', type: 'compact', menu_class: 'align-center', disabled: !this.current_text_style, color: this.curColor, update_color: (new_color) => document.execCommand('foreColor', false, new_color) },
         { is: 'separator' },
         { icon: 'mdi-format-list-numbered', title: 'Numbered list', active: this.isNumberedList, disabled: !this.current_text_style, click: () => document.execCommand('insertOrderedList') },
         { icon: 'mdi-format-list-bulleted', title: 'Bulleted list', active: this.isBulletedList, disabled: !this.current_text_style, click: () => document.execCommand('insertUnorderedList') },
