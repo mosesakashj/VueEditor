@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="px-5 mb-10">
       <template v-for="(i, index) in content" >
         <v-menu offset-y open-on-hover :key="index" v-if="i.menu">
           <template v-slot:activator="{ on, attrs }">

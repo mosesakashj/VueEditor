@@ -1,11 +1,41 @@
 <template>
   <div>
     <!-- Top bar -->
-    <vue-file-toolbar-menu :content="menu" class="bar" />
+    <div>
+      <vue-file-toolbar-menu :content="menu" style="position: fixed; z-index: 1;"/>
+      <v-card v-if="headerForm"  class="pb-5 pt-10">
+        <!-- <v-card-text class="pa-0"> Header </v-card-text> -->
+        <v-card-text>
+          <v-row>
+            <v-col cols="1">Header</v-col>
+            <v-col cols="3">
+              <v-select :items="['For All', 'Diff First Page', 'Diff Odd & Even', 'Diff First, Odd & Even']" v-model="headerOptions"></v-select>
+            </v-col>
+            <v-col></v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-text class="py-0">
+          <v-row>
+            <v-col cols="3" v-if="['For All', 'Diff First Page', 'Diff Odd & Even', 'Diff First, Odd & Even'].includes(headerOptions)"><v-textarea v-model="init_Header[0]" label="First" class="caption"></v-textarea></v-col>
+            <v-col cols="3" v-if="['Diff First Page', 'Diff Odd & Even', 'Diff First, Odd & Even'].includes(headerOptions)"><v-textarea v-model="init_Header[1]" label="Second" class="caption"></v-textarea></v-col>
+            <v-col cols="3" v-if="['Diff First, Odd & Even'].includes(headerOptions)"><v-textarea v-model="init_Header[2]" label="Last" class="caption"></v-textarea></v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+    </div>
+    <div style="background-color: silver;height: 100%;width:100%; overflow: auto">
+      <vue-document-editor class="editor pt-10" ref="editor" :content.sync="content" :overlay="overlay" :zoom="zoom" :page_format_mm="page_format_mm"
+      :page_margins="page_margins" :display="display" />
+    </div>
     <!-- Document editor -->
-    <vue-document-editor class="editor" ref="editor" :content.sync="content" :overlay="overlay" :zoom="zoom" :page_format_mm="page_format_mm"
-     :page_margins="page_margins" :display="display" style="background-color: silver;height: 100%;width:100%; overflow: auto"/>
-
+    <v-bottom-sheet v-model="footerForm" inset>
+      <v-card>
+        <v-card-title class="pa-0"> Footer </v-card-title>
+        <v-card-text class="py-0">
+          <v-textarea v-model="init_Footer[0]" rows="1"></v-textarea>
+        </v-card-text>
+      </v-card>
+    </v-bottom-sheet>
   </div>
 </template>
 
@@ -38,7 +68,12 @@ export default {
       display: 'vertical', // ['grid', 'vertical', 'horizontal']
       mounted: false, // will be true after this component is mounted
       undo_count: -1, // contains the number of times user can undo (= current position in content_history)
-      content_history: [] // contains the content states for undo/redo operations
+      content_history: [], // contains the content states for undo/redo operations
+      headerForm: false,
+      footerForm: false,
+      headerOptions: 'For All',
+      init_Header: [ '<div style="position: absolute; left: 0; top: 0; right: 0; padding: 3mm 5mm; background: rgba(200, 220, 240, 0.5)"><strong>MYCOMPANY</strong> /// This is a custom header overlay</div>', '', '' ],
+      init_Footer: [ '<div style="position: absolute; left: 10mm; right: 10mm; bottom: 5mm; text-align:center; font-size:10pt"> /// This is a custom footer Content</div>', '', '' ]
     }
   },
 
@@ -133,11 +168,13 @@ export default {
         { is: 'separator' },
         { icon: 'mdi-format-list-numbered', title: 'Numbered list', active: this.isNumberedList, disabled: !this.current_text_style, click: () => document.execCommand('insertOrderedList') },
         { icon: 'mdi-format-list-bulleted', title: 'Bulleted list', active: this.isBulletedList, disabled: !this.current_text_style, click: () => document.execCommand('insertUnorderedList') },
-        { html: '<b>H1</b>', title: 'Header 1', active: this.isH1, disabled: !this.current_text_style, click: () => document.execCommand('formatBlock', false, '<h1>') },
-        { html: '<b>H2</b>', title: 'Header 2', active: this.isH2, disabled: !this.current_text_style, click: () => document.execCommand('formatBlock', false, '<h2>') },
-        { html: '<b>H3</b>', title: 'Header 3', active: this.isH3, disabled: !this.current_text_style, click: () => document.execCommand('formatBlock', false, '<h3>') },
+        { icon: 'mdi-format-header-1', title: 'Header 1', active: this.isH1, disabled: !this.current_text_style, click: () => document.execCommand('formatBlock', false, '<h1>') },
+        { icon: 'mdi-format-header-2', title: 'Header 2', active: this.isH2, disabled: !this.current_text_style, click: () => document.execCommand('formatBlock', false, '<h2>') },
+        { icon: 'mdi-format-header-3', title: 'Header 3', active: this.isH3, disabled: !this.current_text_style, click: () => document.execCommand('formatBlock', false, '<h3>') },
         { icon: 'mdi-format-clear', title: 'Clear format', disabled: !this.current_text_style, click () { document.execCommand('removeFormat'); document.execCommand('formatBlock', false, '<div>'); } },
         { icon: 'mdi-view-split-horizontal', title: 'Page break', disabled: !this.current_text_style, click: () => this.insertPageBreak() },
+        { icon: 'mdi-page-layout-header', title: 'Page Header', click: () => this.headerForm = !this.headerForm },
+        { icon: 'mdi-page-layout-footer', title: 'Page Footer', click: () => this.footerForm = !this.footerForm },
         
         { is: 'spacer' },
 
@@ -307,12 +344,53 @@ export default {
     overlay (page, total) {
       // Add page numbers on each page
       let html = '<div style="position: absolute; bottom: 8mm; ' + ((page % 2) ? 'right' : 'left') + ': 10mm">Page ' + page + ' of ' + total + '</div>';
-
+        switch (this.headerOptions) {
+          case 'For All': {
+            if(page >= 1) {
+              html += this.init_Header[0]
+              html += this.init_Footer[0]
+            }
+            break
+          }
+          case 'Diff First Page' : {
+            if (page === 1) {
+              html += this.init_Header[0]
+              html += this.init_Footer[0]
+            } else {
+              html += this.init_Header[1]
+              html += this.init_Footer[0]
+            }
+            break
+          }
+          case 'Diff Odd & Even' : {
+            if (page % 2 === 0) {
+              // Even Pages
+              html += this.init_Header[1]
+              html += this.init_Footer[0]
+            } else {
+              // Odd Pages
+              html += this.init_Header[0]
+              html += this.init_Footer[0]
+            }
+            break
+          }
+          case 'Diff First, Odd & Even' : {
+            if (page === 1) {
+              html += this.init_Header[0]
+              html += this.init_Footer[0]
+            } else if (page % 2 === 0) {
+              // Even Pages
+              html += this.init_Header[2]
+              html += this.init_Footer[0]
+            } else {
+              // Odd Pages
+              html += this.init_Header[1]
+              html += this.init_Footer[0]
+            }
+            break
+          }
+        }
       // Add custom headers and footers from page 1
-      if(page >= 1) {
-        html += '<div style="position: absolute; left: 0; top: 0; right: 0; padding: 3mm 5mm; background: rgba(200, 220, 240, 0.5)"><strong>MYCOMPANY</strong> example.com /// This is a custom header overlay</div>';
-        html += '<div style="position: absolute; left: 10mm; right: 10mm; bottom: 5mm; text-align:center; font-size:10pt"> /// This is a custom footer Content</div>';
-      }
       return html
     },
 
