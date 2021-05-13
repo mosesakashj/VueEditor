@@ -1,5 +1,16 @@
 <template>
-  <div class="px-5" style="border: 1px solid black">
+  <div style="border: 1px solid black">
+    <v-card>
+      <v-btn tile small>File</v-btn>
+      <v-btn tile small>Home</v-btn>
+      <v-btn tile small>Insert</v-btn>
+      <v-btn tile small>Layout</v-btn>
+      <v-btn tile small>References</v-btn>
+      <v-btn tile small>Review</v-btn>
+      <v-btn tile small>View</v-btn>
+      <v-btn tile small>help</v-btn>
+    </v-card>
+    <v-card>
       <template v-for="(i, index) in content" >
         <v-menu offset-y open-on-hover :key="index" v-if="i.menu">
           <template v-slot:activator="{ on, attrs }">
@@ -20,6 +31,7 @@
         <v-btn @click="i.click()" :key="index" v-else-if="i.html" v-html="i.html" tile small :color="i.active ? 'primary' : ''" :disabled="i.disabled"></v-btn>
         <input class="color-apply" :disabled="i.disabled" :key="index" type="color" @change="i.update_color(selectedColor)" v-model="selectedColor" v-if="i.is === 'button-color'">
       </template>
+    </v-card>
   </div>
 </template>
 

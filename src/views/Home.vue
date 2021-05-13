@@ -348,6 +348,7 @@ export default {
     overlay (page, total) {
       // Add page numbers on each page
       let html = '<div style="position: absolute; bottom: 8mm; ' + ((page % 2) ? 'right' : 'left') + ': 10mm">Page ' + page + ' of ' + total + '</div>';
+      if (this.isHeaderEnabled) {
         switch (this.headerOptions) {
           case 'For All': {
             if(page >= 1) {
@@ -394,6 +395,7 @@ export default {
             break
           }
         }
+      }
       // Add custom headers and footers from page 1
       return html
     },
