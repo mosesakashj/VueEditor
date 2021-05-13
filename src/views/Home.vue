@@ -1,20 +1,23 @@
 <template>
-  <div>
+  <div style="height:600px">
     <!-- Top bar -->
     <div>
-      <vue-file-toolbar-menu :content="menu" style="position: fixed; z-index: 1;"/>
-      <v-card v-if="headerForm"  class="pb-5 pt-10">
+      <vue-file-toolbar-menu :content="menu"/>
+      <v-card v-if="headerForm" outlined tile>
         <!-- <v-card-text class="pa-0"> Header </v-card-text> -->
         <v-card-text>
           <v-row>
             <v-col cols="1">Header</v-col>
-            <v-col cols="3">
-              <v-select :items="['For All', 'Diff First Page', 'Diff Odd & Even', 'Diff First, Odd & Even']" v-model="headerOptions"></v-select>
+            <v-col cols="3" class="pa-0">
+              <v-checkbox class="caption pa-0" v-model="isHeaderEnabled" label="Show Header"></v-checkbox>
+            </v-col>
+            <v-col cols="3" class="pa-0">
+              <v-select class="caption pt-0" :items="['For All', 'Diff First Page', 'Diff Odd & Even', 'Diff First, Odd & Even']" v-model="headerOptions"></v-select>
             </v-col>
             <v-col></v-col>
           </v-row>
         </v-card-text>
-        <v-card-text class="py-0">
+        <v-card-text class="py-0" v-if="isHeaderEnabled">
           <v-row>
             <v-col cols="3" v-if="['For All', 'Diff First Page', 'Diff Odd & Even', 'Diff First, Odd & Even'].includes(headerOptions)"><v-textarea v-model="init_Header[0]" label="First" class="caption"></v-textarea></v-col>
             <v-col cols="3" v-if="['Diff First Page', 'Diff Odd & Even', 'Diff First, Odd & Even'].includes(headerOptions)"><v-textarea v-model="init_Header[1]" label="Second" class="caption"></v-textarea></v-col>
@@ -23,10 +26,8 @@
         </v-card-text>
       </v-card>
     </div>
-    <div style="background-color: silver;height: 100%;width:100%; overflow: auto">
-      <vue-document-editor class="editor pt-10" ref="editor" :content.sync="content" :overlay="overlay" :zoom="zoom" :page_format_mm="page_format_mm"
+    <vue-document-editor class="editor pt-10" ref="editor" :content.sync="content" :overlay="overlay" :zoom="zoom" :page_format_mm="page_format_mm"
       :page_margins="page_margins" :display="display" />
-    </div>
     <!-- Document editor -->
     <v-bottom-sheet v-model="footerForm" inset>
       <v-card>
@@ -72,6 +73,7 @@ export default {
       headerForm: false,
       footerForm: false,
       headerOptions: 'For All',
+      isHeaderEnabled: true,
       init_Header: [ '<div style="position: absolute; left: 0; top: 0; right: 0; padding: 3mm 5mm; background: rgba(200, 220, 240, 0.5)"><strong>MYCOMPANY</strong> /// This is a custom header overlay</div>', '', '' ],
       init_Footer: [ '<div style="position: absolute; left: 10mm; right: 10mm; bottom: 5mm; text-align:center; font-size:10pt"> /// This is a custom footer Content</div>', '', '' ]
     }
@@ -166,6 +168,8 @@ export default {
         { icon: 'mdi-format-strikethrough', title: 'Strike through', active: this.isStrikeThrough, disabled: !this.current_text_style, click: () => document.execCommand('strikethrough') },
         { is: 'button-color', type: 'compact', menu_class: 'align-center', disabled: !this.current_text_style, color: this.curColor, update_color: (new_color) => document.execCommand('foreColor', false, new_color) },
         { is: 'separator' },
+        { icon: 'mdi-format-indent-increase', title: 'Indent Increase', active: this.isNumberedList, disabled: !this.current_text_style, click: () => document.execCommand('indent', false, null) },
+        { icon: 'mdi-format-indent-decrease', title: 'Indent Decrease', active: this.isNumberedList, disabled: !this.current_text_style, click: () => document.execCommand('outdent', false, null) },
         { icon: 'mdi-format-list-numbered', title: 'Numbered list', active: this.isNumberedList, disabled: !this.current_text_style, click: () => document.execCommand('insertOrderedList') },
         { icon: 'mdi-format-list-bulleted', title: 'Bulleted list', active: this.isBulletedList, disabled: !this.current_text_style, click: () => document.execCommand('insertUnorderedList') },
         { icon: 'mdi-format-header-1', title: 'Header 1', active: this.isH1, disabled: !this.current_text_style, click: () => document.execCommand('formatBlock', false, '<h1>') },

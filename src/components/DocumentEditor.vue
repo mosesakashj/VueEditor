@@ -1,5 +1,5 @@
 <template>
-  <div class='editor' ref='editor'>
+  <div class='editor' ref='editor'  style="background-color: silver;height: 777px;width:100%; overflow: auto">
 
     <!-- Page overlays (headers, footers, page numbers, ...) -->
     <div v-if='overlay' class='overlays'>
@@ -9,7 +9,7 @@
     </div>
 
     <!-- Document editor -->
-    <div class='content' ref='content' :contenteditable='editable' :style='page_style(-1)' @input='input' @keyup='process_current_text_style' style='overflow: auto;width: 100%'>
+    <div class='content' ref='content' :contenteditable='editable' :style='page_style(-1)' @input='input' @keyup='process_current_text_style'>
       <!-- Contains every page of the document (can be modified by the DOM afterwards) -->
       <div v-for='(page, page_no) in pages' class='page'
         :key='page.uuid' :ref='page.uuid' :data-content-idx='page.content_idx' :data-page-idx='page_no'
@@ -456,5 +456,68 @@ body {
 }
 </style>
 <style lang="scss" scoped>
-  @import "./doc-editor-default-styles.scss";
+  // @import "./doc-editor-default-styles.scss";
+  ::v-deep.editor {
+    display: block;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    cursor: default;
+
+    ::-webkit-scrollbar {
+      width: 16px;
+      height: 16px;
+    }
+
+    ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {
+      display: none;
+    }
+
+    &.hide_children > * {
+      display: none;
+    }
+
+    & > .content {
+      position: relative;
+      outline: none;
+      margin: 0;
+      padding: 0;
+      min-width: 100%;
+      pointer-events: none;
+
+      & > .page {
+        position: absolute;
+        box-sizing: border-box;
+        left: 50%;
+        transform-origin: center top;
+        background: white;
+        overflow: hidden;
+        pointer-events: all;
+      }
+
+      &[contenteditable=true], & *[contenteditable=true] {
+        cursor: text;
+      }
+      & *[contenteditable=false] {
+        cursor: default;
+      }
+    }
+
+    & > .overlays {
+      position: relative;
+      margin: 0;
+      padding: 0;
+      min-width: 100%;
+      pointer-events: none;
+
+      & > .overlay {
+        position: absolute;
+        box-sizing: border-box;
+        left: 50%;
+        transform-origin: center top;
+        transition: left .3s, top .3s;
+        overflow: hidden;
+        z-index: 1;
+      }
+    }
+  }
 </style>
